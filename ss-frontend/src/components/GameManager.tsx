@@ -1,4 +1,4 @@
-import { useEffect, useState, FC } from 'react'
+import { useEffect, useState, FC, useRef } from 'react'
 import GameButton from './GameButton'
 import '../assets/styles.scss'
 import { getNumberInRange } from '../utils/GenericFuncs'
@@ -13,10 +13,11 @@ interface GameManagerProps {
 
 const GameManager: FC<GameManagerProps> = ({}: GameManagerProps) => {
     const [gameStarted, setGameStarted] = useState<boolean>(false)
+    const [gameOver, setGameOver] = useState<boolean>(false)
+    const [pauseClicks, setPauseClicks] = useState<boolean>(false)
     const [score, setScore] = useState<number>(0)
     const [sequence, setSequence] = useState<number[]>([])
-    const [sequenceIndex, setSequenceIndex] = useState<number>(-1)
-    const [buttonPressed, setButtonPressed] = useState<number>(0)
+    const sequenceIndexRef = useRef<number>(-1)
     const [glowingButton, setGlowingButton] = useState<number>(0)
 
     const setNextLevel = () => {
@@ -24,46 +25,53 @@ const GameManager: FC<GameManagerProps> = ({}: GameManagerProps) => {
         setSequence((prevSequence) => [...prevSequence, n])
     }
 
-    const showSequence = () => {
+    const showSequence = async () => {
         for (const num of sequence) {
             console.log('HI ' + num)
             setGlowingButton(num)
-            setTimeout(() => {
-                setGlowingButton(0)
-            }, 300)
+
+            await new Promise((resolve) => setTimeout(resolve, 300))
+
+            setGlowingButton(0)
+            await new Promise((resolve) => setTimeout(resolve, 300))
         }
     }
 
     useEffect(() => {
         if (gameStarted) {
             setNextLevel()
-            setSequenceIndex(0)
+            sequenceIndexRef.current = 0
         }
     }, [gameStarted])
 
     useEffect(() => {
         if (sequence) {
-            showSequence()
+            setPauseClicks(true)
+            showSequence().then(() => {
+                setPauseClicks(false)
+            })
         }
     }, [sequence])
 
     const handleButtonPressed = (buttonPressed: number) => {
-        console.log('buttonPressed ' + buttonPressed)
-        console.log('sequence[sequenceIndex] ' + sequence[sequenceIndex])
-        if (sequence[sequenceIndex] === buttonPressed) {
-            setSequenceIndex((prevIndex) => prevIndex + 1)
-        } else if (sequence[sequenceIndex] !== buttonPressed) setScore(0)
-    }
-
-    useEffect(() => {
-        console.log('sequenceIndex ' + sequenceIndex)
-        console.log('sequence.length ' + sequence.length)
-        console.log('===========')
-        if (sequenceIndex >= sequence.length) {
-            setSequenceIndex(0)
-            setScore((prevScore) => prevScore + 1)
+        if (gameOver) return
+        console.log(
+            'buttonPressed ' +
+                buttonPressed +
+                ' with index ' +
+                sequenceIndexRef.current
+        )
+        if (sequence[sequenceIndexRef.current] === buttonPressed) {
+            sequenceIndexRef.current += 1
+            if (sequenceIndexRef.current >= sequence.length) {
+                sequenceIndexRef.current = 0
+                setScore((prevScore) => prevScore + 1)
+            }
+        } else {
+            setGameOver(true)
+            alert('game over')
         }
-    }, [sequenceIndex])
+    }
 
     useEffect(() => {
         if (score) {
@@ -73,8 +81,10 @@ const GameManager: FC<GameManagerProps> = ({}: GameManagerProps) => {
 
     return (
         <div>
-            <h1>{gameStarted ? `Score: ${score}` : 'Welcome To SimonSays'}</h1>
             <div className="buttons-container">
+                <h1>
+                    {gameStarted ? `Score: ${score}` : 'Welcome To SimonSays'}
+                </h1>
                 <div className="game-buttons-container">
                     <GameButton
                         initialClassName="btn green"
@@ -82,6 +92,7 @@ const GameManager: FC<GameManagerProps> = ({}: GameManagerProps) => {
                         glowing={glowingButton === ColorNumbers.Green}
                         colorNumber={ColorNumbers.Green}
                         handleButtonPressed={handleButtonPressed}
+                        clickable={!pauseClicks && !gameOver}
                     />
                     <GameButton
                         initialClassName="btn red"
@@ -89,6 +100,7 @@ const GameManager: FC<GameManagerProps> = ({}: GameManagerProps) => {
                         glowing={glowingButton === ColorNumbers.Red}
                         colorNumber={ColorNumbers.Red}
                         handleButtonPressed={handleButtonPressed}
+                        clickable={!pauseClicks && !gameOver}
                     />
                     <GameButton
                         initialClassName="btn yellow"
@@ -96,6 +108,7 @@ const GameManager: FC<GameManagerProps> = ({}: GameManagerProps) => {
                         glowing={glowingButton === ColorNumbers.Yellow}
                         colorNumber={ColorNumbers.Yellow}
                         handleButtonPressed={handleButtonPressed}
+                        clickable={!pauseClicks && !gameOver}
                     />
                     <GameButton
                         initialClassName="btn blue"
@@ -103,6 +116,7 @@ const GameManager: FC<GameManagerProps> = ({}: GameManagerProps) => {
                         glowing={glowingButton === ColorNumbers.Blue}
                         colorNumber={ColorNumbers.Blue}
                         handleButtonPressed={handleButtonPressed}
+                        clickable={!pauseClicks && !gameOver}
                     />
                 </div>
                 <button

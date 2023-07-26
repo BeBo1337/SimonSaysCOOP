@@ -1,6 +1,7 @@
 import { useEffect, useState, FC } from 'react'
 
 import blue from '../assets/sounds/blue.mp3'
+import { ColorStrings } from '../utils/ColorsConstants'
 
 interface ButtonProps {
     initialClassName: string
@@ -8,6 +9,7 @@ interface ButtonProps {
     glowing: boolean
     colorNumber: number
     handleButtonPressed: Function
+    clickable: boolean
 }
 
 const GameButton: FC<ButtonProps> = ({
@@ -15,27 +17,31 @@ const GameButton: FC<ButtonProps> = ({
     gameStarted,
     glowing,
     colorNumber,
-    handleButtonPressed
+    handleButtonPressed,
+    clickable
 }: ButtonProps) => {
     const [className, setClassName] = useState(initialClassName)
-    const [isClickable, setIsClickable] = useState(true)
+    const [isClickable, setIsClickable] = useState(true) //same button spam stopper
     const clickSound = new Audio(blue)
 
     const handleButtonClick = () => {
-        clickSound.play()
-        setClassName('btn blinking')
-        setIsClickable(false)
+        if (clickable) {
+            clickSound.play()
+            setClassName('btn blinking')
+            setIsClickable(false)
 
-        setTimeout(() => {
-            setClassName(initialClassName)
-            setIsClickable(true)
-            handleButtonPressed(colorNumber)
-        }, 300)
+            setTimeout(() => {
+                setClassName(initialClassName)
+                setIsClickable(true)
+                handleButtonPressed(colorNumber)
+            }, 300)
+        }
     }
 
     useEffect(() => {
         if (glowing) {
-            setClassName('btn glowing')
+            console.log(`btn glowing ${ColorStrings[colorNumber]}`)
+            setClassName(`btn glowing ${ColorStrings[colorNumber]}`)
         } else {
             setClassName(initialClassName)
         }

@@ -83,7 +83,7 @@ h1 {
 }
 
 .btn:hover {
-    opacity: 70%;
+    opacity: 80%;
 }
 
 .game-over {
@@ -112,28 +112,100 @@ h1 {
     background-color: grey;
 }
 
-@keyframes glow {
+@keyframes glowGreen {
     0% {
         box-shadow: 0 0 20px white;
-        background-color: grey;
+        background-color: rgb(18, 181, 18);
         border: 10px solid white;
         opacity: 100%;
     }
     50% {
-        box-shadow: 0 0 20px rgb(25, 23, 23);
-        background-color: grey;
+        box-shadow: 0 0 20px green;
+        background-color: rgb(18, 181, 18);
         opacity: 50%;
     }
     100% {
         box-shadow: 0 0 20px white;
-        background-color: grey;
+        background-color: rgb(18, 181, 18);
         border: 10px solid white;
         opacity: 100%;
     }
 }
 
-.glowing {
-    animation: glow 1s infinite;
+@keyframes glowRed {
+    0% {
+        box-shadow: 0 0 20px white;
+        background-color: rgb(250, 33, 33);
+        border: 10px solid white;
+        opacity: 100%;
+    }
+    50% {
+        box-shadow: 0 0 20px red;
+        background-color: rgb(250, 33, 33);
+        opacity: 50%;
+    }
+    100% {
+        box-shadow: 0 0 20px white;
+        background-color: rgb(250, 33, 33);
+        border: 10px solid white;
+        opacity: 100%;
+    }
+}
+
+@keyframes glowYellow {
+    0% {
+        box-shadow: 0 0 20px white;
+        background-color: rgb(250, 250, 55);
+        border: 10px solid white;
+        opacity: 100%;
+    }
+    50% {
+        box-shadow: 0 0 20px yellow;
+        background-color: rgb(250, 250, 55);
+        opacity: 50%;
+    }
+    100% {
+        box-shadow: 0 0 20px white;
+        background-color: rgb(250, 250, 55);
+        border: 10px solid white;
+        opacity: 100%;
+    }
+}
+
+@keyframes glowBlue {
+    0% {
+        box-shadow: 0 0 20px white;
+        background-color: rgb(26, 26, 252);
+        border: 10px solid white;
+        opacity: 100%;
+    }
+    50% {
+        box-shadow: 0 0 20px blue;
+        background-color: rgb(26, 26, 252);
+        opacity: 50%;
+    }
+    100% {
+        box-shadow: 0 0 20px white;
+        background-color: rgb(26, 26, 252);
+        border: 10px solid white;
+        opacity: 100%;
+    }
+}
+
+.glowing.green {
+    animation: glowGreen 1s infinite;
+}
+
+.glowing.red {
+    animation: glowRed 1s infinite;
+}
+
+.glowing.yellow {
+    animation: glowYellow 1s infinite;
+}
+
+.glowing.blue {
+    animation: glowBlue 1s infinite;
 }
 
 @keyframes blink {
