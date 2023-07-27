@@ -192,6 +192,26 @@ h1 {
     }
 }
 
+@keyframes glowWrong {
+    0% {
+        box-shadow: 0 0 20px rgb(255, 0, 0);
+        background-color: rgb(198, 30, 30);
+        border: 10px solid rgb(255, 132, 132);
+        opacity: 100%;
+    }
+    50% {
+        box-shadow: 0 0 20px rgb(255, 132, 132);
+        background-color: rgb(198, 30, 30);
+        opacity: 50%;
+    }
+    100% {
+        box-shadow: 0 0 20px rgb(255, 0, 0);
+        background-color: rgb(198, 30, 30);
+        border: 10px solid rgb(255, 132, 132);
+        opacity: 100%;
+    }
+}
+
 .glowing.green {
     animation: glowGreen 1s infinite;
 }
@@ -206,6 +226,10 @@ h1 {
 
 .glowing.blue {
     animation: glowBlue 1s infinite;
+}
+
+.glowing.wrong {
+    animation: glowWrong 1s infinite;
 }
 
 @keyframes blink {

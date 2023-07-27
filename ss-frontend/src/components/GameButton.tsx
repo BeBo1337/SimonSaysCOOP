@@ -1,6 +1,6 @@
 import { useEffect, useState, FC } from 'react'
 
-import blue from '../assets/sounds/blue.mp3'
+import correct from '../assets/sounds/Correct.mp3'
 import { ColorStrings } from '../utils/ColorsConstants'
 
 interface ButtonProps {
@@ -10,6 +10,7 @@ interface ButtonProps {
     colorNumber: number
     handleButtonPressed: Function
     clickable: boolean
+    gameOver: boolean
 }
 
 const GameButton: FC<ButtonProps> = ({
@@ -18,11 +19,12 @@ const GameButton: FC<ButtonProps> = ({
     glowing,
     colorNumber,
     handleButtonPressed,
-    clickable
+    clickable,
+    gameOver
 }: ButtonProps) => {
     const [className, setClassName] = useState(initialClassName)
     const [isClickable, setIsClickable] = useState(true) //same button spam stopper
-    const clickSound = new Audio(blue)
+    const clickSound = new Audio(correct)
 
     const handleButtonClick = () => {
         if (clickable) {
@@ -46,6 +48,12 @@ const GameButton: FC<ButtonProps> = ({
             setClassName(initialClassName)
         }
     }, [glowing])
+
+    useEffect(() => {
+        if (gameOver) {
+            setClassName(`btn glowing wrong`)
+        }
+    }, [gameOver])
 
     return (
         <div

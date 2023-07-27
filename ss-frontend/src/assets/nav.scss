@@ -1,0 +1,45 @@
+/* nav.scss */
+.navbar {
+    background-color: var(--backColor);
+    padding: 10px;
+    display: flex;
+    justify-content: center;
+}
+
+.nav-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    gap: 20px;
+}
+
+.nav-item {
+    padding: 0 10px;
+}
+
+.nav-link {
+    color: var(--white);
+    text-decoration: none;
+    font-size: 18px;
+    position: relative;
+}
+
+.nav-link::after {
+    content: '';
+    position: absolute;
+    background-color: var(--white);
+    height: 3px;
+    width: 0;
+    left: 0;
+    bottom: -3px;
+    transition: width 0.3s;
+}
+
+.nav-link:hover {
+    color: var(--white) !important;
+}
+
+.nav-link:hover::after {
+    width: 100%;
+}
