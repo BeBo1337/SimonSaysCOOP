@@ -3,7 +3,6 @@ import GameButton from './GameButton'
 import '../assets/styles.scss'
 import { getNumberInRange } from '../utils/GenericFuncs'
 import { ColorNumbers } from '../utils/ColorsConstants'
-import wrong from '../assets/sounds/Wrong.mp3'
 
 interface GameManagerProps {
     //   gameMode: number;
@@ -20,8 +19,6 @@ const GameManager: FC<GameManagerProps> = ({}: GameManagerProps) => {
     const [sequence, setSequence] = useState<number[]>([])
     const sequenceIndexRef = useRef<number>(-1)
     const [glowingButton, setGlowingButton] = useState<number>(0)
-
-    const wrongSound = new Audio(wrong)
 
     const setNextLevel = () => {
         let n = getNumberInRange(1, 4)
@@ -71,9 +68,8 @@ const GameManager: FC<GameManagerProps> = ({}: GameManagerProps) => {
                 setScore((prevScore) => prevScore + 1)
             }
         } else {
-            wrongSound.play()
             setGameOver(true)
-            console.log('game over')
+            alert('game over')
         }
     }
 
@@ -97,7 +93,6 @@ const GameManager: FC<GameManagerProps> = ({}: GameManagerProps) => {
                         colorNumber={ColorNumbers.Green}
                         handleButtonPressed={handleButtonPressed}
                         clickable={!pauseClicks && !gameOver}
-                        gameOver={gameOver}
                     />
                     <GameButton
                         initialClassName="btn red"
@@ -106,7 +101,6 @@ const GameManager: FC<GameManagerProps> = ({}: GameManagerProps) => {
                         colorNumber={ColorNumbers.Red}
                         handleButtonPressed={handleButtonPressed}
                         clickable={!pauseClicks && !gameOver}
-                        gameOver={gameOver}
                     />
                     <GameButton
                         initialClassName="btn yellow"
@@ -115,7 +109,6 @@ const GameManager: FC<GameManagerProps> = ({}: GameManagerProps) => {
                         colorNumber={ColorNumbers.Yellow}
                         handleButtonPressed={handleButtonPressed}
                         clickable={!pauseClicks && !gameOver}
-                        gameOver={gameOver}
                     />
                     <GameButton
                         initialClassName="btn blue"
@@ -124,7 +117,6 @@ const GameManager: FC<GameManagerProps> = ({}: GameManagerProps) => {
                         colorNumber={ColorNumbers.Blue}
                         handleButtonPressed={handleButtonPressed}
                         clickable={!pauseClicks && !gameOver}
-                        gameOver={gameOver}
                     />
                 </div>
                 <button
