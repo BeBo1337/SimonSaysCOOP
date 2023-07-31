@@ -5,14 +5,28 @@ import './assets/styles.scss'
 import './App.css'
 import GameManager from './components/GameManager'
 import MainMenu from './components/MainMenu'
+import MsgModal from './components/MsgModal'
 import { Routes, Route } from 'react-router-dom'
 
 function App() {
+    const [gameMode, setGameMode] = useState(2)
+    const [isHost, setIsHost] = useState<boolean | null>(true)
+    const [modalMsg, setModalMsg] = useState<string>('')
+    const [showModal, setShowModal] = useState(false)
+
     return (
         <>
             <Routes>
-                <Route path="/game" element={<GameManager />} />
-                <Route path="/" element={<MainMenu />} />
+                <Route
+                    path="/game"
+                    element={
+                        <GameManager gameMode={gameMode} isHost={isHost} />
+                    }
+                />
+                <Route
+                    path="/"
+                    element={<MainMenu setGameMode={setGameMode} />}
+                />
             </Routes>
         </>
     )

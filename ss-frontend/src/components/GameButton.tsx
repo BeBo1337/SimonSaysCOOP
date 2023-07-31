@@ -1,21 +1,18 @@
 import { useEffect, useState, FC } from 'react'
-
 import correct from '../assets/sounds/Correct.mp3'
 import { ColorStrings } from '../utils/ColorsConstants'
 
 interface ButtonProps {
     initialClassName: string
-    gameStarted: boolean
     glowing: boolean
-    colorNumber: number
-    handleButtonPressed: Function
+    colorNumber?: number
+    handleButtonPressed?: Function
     clickable: boolean
     gameOver: boolean
 }
 
 const GameButton: FC<ButtonProps> = ({
     initialClassName,
-    gameStarted,
     glowing,
     colorNumber,
     handleButtonPressed,
@@ -35,15 +32,16 @@ const GameButton: FC<ButtonProps> = ({
             setTimeout(() => {
                 setClassName(initialClassName)
                 setIsClickable(true)
-                handleButtonPressed(colorNumber)
+                if (handleButtonPressed) handleButtonPressed(colorNumber)
             }, 300)
         }
     }
 
     useEffect(() => {
         if (glowing) {
-            console.log(`btn glowing ${ColorStrings[colorNumber]}`)
-            setClassName(`btn glowing ${ColorStrings[colorNumber]}`)
+            if (colorNumber)
+                setClassName(`btn glowing ${ColorStrings[colorNumber]}`)
+            else setClassName(`btn-coop glowing orange`)
         } else {
             setClassName(initialClassName)
         }
@@ -51,14 +49,15 @@ const GameButton: FC<ButtonProps> = ({
 
     useEffect(() => {
         if (gameOver) {
-            setClassName(`btn glowing wrong`)
+            if (colorNumber) setClassName(`btn glowing wrong`)
+            else setClassName(`btn-coop glowing wrong`)
         }
     }, [gameOver])
 
     return (
         <div
             className={className}
-            onClick={isClickable && gameStarted ? handleButtonClick : () => {}}
+            onClick={isClickable ? handleButtonClick : () => {}}
         ></div>
     )
 }

@@ -7,12 +7,13 @@ import DropdownMenu from './GameModeMenu'
 import MsgModal from './MsgModal'
 
 interface MainMenuProps {
-    // setGameMode: Function
+    setGameMode: Function
     // setPlayerID: Function
 }
 
-const MainMenu: FC<MainMenuProps> = ({}: // setGameMode,
-// setPlayerID
+const MainMenu: FC<MainMenuProps> = ({
+    setGameMode
+}: // setPlayerID
 MainMenuProps) => {
     const [mode, setMode] = useState(0)
     const [name, setName] = useState<string>('')
@@ -28,9 +29,11 @@ MainMenuProps) => {
         switch (selectedOption) {
             case 'Classic':
                 setMode(Modes.CLASSIC)
+                setGameMode(Modes.CLASSIC)
                 break
             case 'CO-OP':
                 setMode(Modes.CO_OP)
+                setGameMode(Modes.CO_OP)
                 break
         }
     }

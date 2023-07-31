@@ -82,6 +82,14 @@ h1 {
     }
 }
 
+.btn-coop {
+    height: 4em;
+    width: 85%;
+    border: 10px solid black;
+    border-radius: 20px;
+    background-color: orange;
+}
+
 .btn:hover {
     opacity: 80%;
 }
@@ -127,6 +135,26 @@ h1 {
     100% {
         box-shadow: 0 0 20px white;
         background-color: rgb(18, 181, 18);
+        border: 10px solid white;
+        opacity: 100%;
+    }
+}
+
+@keyframes glowOrange {
+    0% {
+        box-shadow: 0 0 20px white;
+        background-color: rgb(250, 163, 33);
+        border: 10px solid white;
+        opacity: 100%;
+    }
+    50% {
+        box-shadow: 0 0 20px orange;
+        background-color: rgb(250, 163, 33);
+        opacity: 50%;
+    }
+    100% {
+        box-shadow: 0 0 20px white;
+        background-color: rgb(250, 163, 33);
         border: 10px solid white;
         opacity: 100%;
     }
@@ -214,6 +242,10 @@ h1 {
 
 .glowing.green {
     animation: glowGreen 1s infinite;
+}
+
+.glowing.orange {
+    animation: glowOrange 1s infinite;
 }
 
 .glowing.red {
