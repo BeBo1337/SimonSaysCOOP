@@ -1,11 +1,16 @@
 import { useEffect, useState, FC, useRef } from 'react'
+import { useNavigate } from 'react-router-dom'
 import GameButton from './GameButton'
 import '../assets/styles.scss'
-import '../assets/buttons.scss'
 import wrong from '../assets/sounds/Wrong.mp3'
 import { getNumberInRange } from '../utils/GenericFuncs'
 import { ColorNumbers } from '../utils/ColorsConstants'
 import { Modes } from '../utils/GameConstants'
+
+import EventsManager from '../services/EventsManager'
+import SocketManager from '../services/SocketManager'
+import { SocketEvents } from '../services/SocketEvents'
+import { ButtonPayload } from '../payloads/ButtonPayload'
 
 interface GameManagerProps {
     gameMode: number
@@ -20,19 +25,16 @@ const GameManager: FC<GameManagerProps> = ({
     isHost
 }: GameManagerProps) => {
     const [gameOver, setGameOver] = useState<boolean>(false)
+    const [showGameOverMessage, setShowGameOverMessage] =
+        useState<boolean>(false)
     const [pauseClicks, setPauseClicks] = useState<boolean>(false)
     const [score, setScore] = useState<number>(0)
     const [sequence, setSequence] = useState<number[]>([])
     const sequenceIndexRef = useRef<number>(-1)
     const [glowingButton, setGlowingButton] = useState<number>(0)
 
+    const navigate = useNavigate()
     const wrongSound = new Audio(wrong)
-    const setNextLevel = () => {
-        let n: number
-        if (gameMode === Modes.CO_OP) n = getNumberInRange(1, 8)
-        if (gameMode === Modes.CLASSIC) n = getNumberInRange(1, 4)
-        setSequence((prevSequence) => [...prevSequence, n])
-    }
 
     const showSequence = async () => {
         for (const num of sequence) {
@@ -47,21 +49,46 @@ const GameManager: FC<GameManagerProps> = ({
     }
 
     useEffect(() => {
-        setTimeout(() => {
-            setNextLevel()
-            sequenceIndexRef.current = 0
-        }, 1000)
-    }, [])
-
-    useEffect(() => {
         if (sequence) {
             setPauseClicks(true)
             showSequence().then(() => {
                 setPauseClicks(false)
             })
         }
+
+        //Server response function
+        const handleButtonClicked = (p: ButtonPayload) => {
+            if (sequence[p.currentSeqIndex] === p.buttonColor) {
+                sequenceIndexRef.current += 1
+                if (sequenceIndexRef.current >= sequence.length) {
+                    sequenceIndexRef.current = 0
+                    setScore((prevScore) => prevScore + 1)
+                }
+            } else {
+                setGameOver(true)
+                wrongSound.play()
+                setShowGameOverMessage(true)
+                console.log('game over')
+            }
+        }
+
+        //Attach event listener to current render
+        EventsManager.instance.on(
+            SocketEvents.BUTTON_CLICKED,
+            'GameManager',
+            handleButtonClicked
+        )
+
+        // Cleanup the event listener
+        return () => {
+            EventsManager.instance.off(
+                SocketEvents.BUTTON_CLICKED,
+                'GameManager'
+            )
+        }
     }, [sequence])
 
+    //frontend press trigger emit to server
     const handleButtonPressed = (buttonPressed: number) => {
         if (gameOver) return
         console.log(
@@ -70,22 +97,20 @@ const GameManager: FC<GameManagerProps> = ({
                 ' with index ' +
                 sequenceIndexRef.current
         )
-        if (sequence[sequenceIndexRef.current] === buttonPressed) {
-            sequenceIndexRef.current += 1
-            if (sequenceIndexRef.current >= sequence.length) {
-                sequenceIndexRef.current = 0
-                setScore((prevScore) => prevScore + 1)
-            }
-        } else {
-            setGameOver(true)
-            wrongSound.play()
-            console.log('game over')
-        }
+
+        EventsManager.instance.trigger(SocketEvents.BUTTON_CLICKED, {
+            buttonColor: buttonPressed,
+            currentSeqIndex: sequenceIndexRef.current
+        } as ButtonPayload)
     }
 
     useEffect(() => {
         if (score) {
-            setNextLevel()
+            if (SocketManager.instance.isHost)
+                EventsManager.instance.trigger(
+                    SocketEvents.GENERATE_SEQUENCE,
+                    {}
+                )
         }
     }, [score])
 
@@ -98,6 +123,70 @@ const GameManager: FC<GameManagerProps> = ({
         } else {
             return !guestValidGlowingButtons.includes(glowingButton)
         }
+    }
+
+    const handleSequenceGen = (n: number) => {
+        setSequence((prevSequence) => [...prevSequence, n])
+    }
+
+    // onMount
+    useEffect(() => {
+        if (!SocketManager.instance.roomId) {
+            //     // toast.error('Please create/join a room to enter a game', {
+            //     //     position: toast.POSITION.BOTTOM_CENTER,
+            //     //     autoClose: 1500
+            //     // })
+            navigate('/')
+        }
+
+        EventsManager.instance.on(
+            SocketEvents.SEQUENCE_GENERATED,
+            'GameManager',
+            handleSequenceGen
+        )
+
+        setTimeout(() => {
+            sequenceIndexRef.current = 0
+            if (SocketManager.instance.isHost) {
+                EventsManager.instance.trigger(
+                    SocketEvents.GENERATE_SEQUENCE,
+                    {}
+                )
+            }
+        }, 1000)
+    }, [])
+
+    // onBeforeDestroy
+    useEffect(
+        () => () => {
+            EventsManager.instance.off(
+                SocketEvents.BUTTON_CLICKED,
+                'GameManager'
+            )
+
+            EventsManager.instance.off(
+                SocketEvents.SEQUENCE_GENERATED,
+                'GameManager'
+            )
+        },
+        []
+    )
+
+    const handleTryAgain = () => {
+        setGameOver(false)
+        setScore(0)
+        setSequence([])
+        setShowGameOverMessage(false)
+
+        setTimeout(() => {
+            sequenceIndexRef.current = 0
+            if (SocketManager.instance.isHost) {
+                EventsManager.instance.trigger(
+                    SocketEvents.GENERATE_SEQUENCE,
+                    {}
+                )
+            }
+        }, 1000)
     }
 
     return (
@@ -172,6 +261,24 @@ const GameManager: FC<GameManagerProps> = ({
                     />
                 </div>
             </div>
+            <div
+                className={`dimOverlay ${showGameOverMessage ? 'visible' : ''}`}
+            />
+            {showGameOverMessage && (
+                <>
+                    <div className="gameOverContainer">
+                        <div className="gameOverMessage">
+                            <p>{`You scored: ${score}. Try again?`}</p>
+                            <button
+                                className="gameOverButton"
+                                onClick={handleTryAgain}
+                            >
+                                Try Again
+                            </button>
+                        </div>
+                    </div>
+                </>
+            )}
         </div>
     )
 }

@@ -52,6 +52,9 @@ const GameButton: FC<ButtonProps> = ({
             if (colorNumber) setClassName(`btn glowing wrong`)
             else setClassName(`btn-coop glowing wrong`)
         }
+        if (!gameOver) {
+            setClassName(initialClassName)
+        }
     }, [gameOver])
 
     return (

@@ -5,6 +5,9 @@ import '../assets/styles.scss'
 import svgLogo from '../../public/SimonSaysLogo.png'
 import DropdownMenu from './GameModeMenu'
 import MsgModal from './MsgModal'
+import { CreateRoomPayload } from '../payloads/CreateRoomPayload'
+import EventsManager from '../services/EventsManager'
+import { SocketEvents } from '../services/SocketEvents'
 
 interface MainMenuProps {
     setGameMode: Function
@@ -67,9 +70,10 @@ MainMenuProps) => {
             setIsNameError(false)
             setIsModeError(true)
         } else if (!isModeError && !isNameError) {
-            setTimeout(() => {
-                navigate('/game')
-            }, 1000)
+            EventsManager.instance.trigger(SocketEvents.CREATE_ROOM, {
+                playerId: name,
+                gameMode: mode
+            })
         }
 
         setTimeout(() => {
@@ -77,6 +81,39 @@ MainMenuProps) => {
             setIsModeError(false)
         }, 1000)
     }
+
+    const onRoomCreated = (p: CreateRoomPayload) => {
+        console.log(p)
+        setGameMode(p.gameMode)
+        //setPlayerID(p.host)
+
+        if (p.gameMode === Modes.CO_OP) {
+            setTimeout(() => {
+                navigate(`/create?roomId=${p.roomId}`)
+            }, 1000)
+        } else if (p.gameMode === Modes.CLASSIC) {
+            setTimeout(() => {
+                navigate('/game')
+            }, 1000)
+        }
+    }
+
+    // onMount
+    useEffect(() => {
+        EventsManager.instance.on(
+            SocketEvents.ROOM_CREATED,
+            'MainMenu',
+            onRoomCreated
+        )
+    }, [])
+
+    // onBeforeDestroy
+    useEffect(
+        () => () => {
+            EventsManager.instance.off(SocketEvents.ROOM_CREATED, 'MainMenu')
+        },
+        []
+    )
 
     const handleCloseModal = () => {
         setShowModal(false)

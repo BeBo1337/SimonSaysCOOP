@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import reactLogo from './assets/react.svg'
 import viteLogo from '/vite.svg'
 import './assets/styles.scss'
@@ -6,6 +6,8 @@ import './App.css'
 import GameManager from './components/GameManager'
 import MainMenu from './components/MainMenu'
 import MsgModal from './components/MsgModal'
+import SocketManager from './services/SocketManager'
+import EventsManager from './services/EventsManager'
 import { Routes, Route } from 'react-router-dom'
 
 function App() {
@@ -13,6 +15,10 @@ function App() {
     const [isHost, setIsHost] = useState<boolean | null>(true)
     const [modalMsg, setModalMsg] = useState<string>('')
     const [showModal, setShowModal] = useState(false)
+
+    useEffect(() => {
+        SocketManager.newInstance()
+    }, [])
 
     return (
         <>

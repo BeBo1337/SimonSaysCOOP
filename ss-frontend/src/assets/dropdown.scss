@@ -1,0 +1,59 @@
+// dropdown
+.dropdown {
+    font-family: 'Press Start 2P', cursive;
+    position: relative;
+    display: inline-block;
+}
+
+.dropdownToggle {
+    background-color: #f5f5f5;
+    color: #333;
+    padding: 8px 16px;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+.dropdownMenu {
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.2s;
+    font-family: 'Press Start 2P', cursive;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+}
+
+.fadeIn {
+    opacity: 1;
+    visibility: visible;
+}
+.dropdownMenu li {
+    border-radius: 10px;
+    padding: 5px 0px;
+    cursor: pointer;
+    color: #242424;
+    list-style: none;
+    background-color: rgb(235, 235, 235);
+    transition: background-color 0.3s;
+    box-shadow: 1px 1px 1px 1px black;
+    width: 100%;
+    font-size: 30px;
+}
+
+.dropdownMenu li.top:hover {
+    background: linear-gradient(to right, green, red);
+    color: rgb(255, 255, 255);
+}
+
+.dropdownMenu li.bot:hover {
+    background: linear-gradient(to right, yellow, blue);
+    color: rgb(255, 255, 255);
+}
