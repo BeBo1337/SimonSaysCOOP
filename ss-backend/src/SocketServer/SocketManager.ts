@@ -48,26 +48,21 @@ export class SocketManager {
     this._socket.emit(SocketEvents.PONG, { message: "pong" });
   }
 
-  private _createRoom(player: string, gameMode: number) {
+  private _createRoom(gameMode: number) {
     const room = uniqid("room-");
 
-    SocketManager._activeGames[room] = new GameSession(
-      room,
-      [player],
-      gameMode,
-    );
+    SocketManager._activeGames[room] = new GameSession(room, gameMode);
     this._socket.join(room.toString());
     const payload: CreateRoomPayload = {
       roomId: room,
       gameMode: gameMode,
-      host: player,
     };
     console.log(`${room} created`);
     this._socket.emit(SocketEvents.ROOM_CREATED, payload);
   }
 
-  private _joinRoom(roomId: string, playerId: string) {
-    if (!roomId || !playerId) {
+  private _joinRoom(roomId: string) {
+    if (!roomId) {
       this._sendError(
         "joinRoom",
         "There was an issue, please try again",
@@ -88,21 +83,19 @@ export class SocketManager {
       const payload: JoinRoomPayload = {
         roomId: session.roomId,
         gameMode: session.gameMode,
-        players: session.players,
-        host: session.host,
         playerJoined: true,
       };
       this._socket.join(roomId);
-      if (session.players.length < 2) {
-        session.addPlayer(playerId);
+      if (session.playerCount < 2) {
+        session.addPlayer();
       } else payload.playerJoined = false;
 
       this._io.sockets.in(roomId).emit(SocketEvents.ROOM_JOINED, payload);
     }
   }
 
-  private _startGame(roomId: string, playerId: string) {
-    if (!roomId || !playerId) {
+  private _startGame(roomId: string, host: boolean | null) {
+    if (!roomId || host === null) {
       this._sendError(
         "startGame",
         "There was an issue, please try again",
@@ -118,24 +111,14 @@ export class SocketManager {
       );
       return;
     }
-    const session = SocketManager._activeGames[roomId];
-    if (session.host !== playerId) {
-      this._sendError(
-        "startGame",
-        "There was an issue, please try again",
-        `host error`,
-      );
+    if (host === false) {
       return;
     }
     this._io.sockets.in(roomId).emit(SocketEvents.GAME_STARTED, {});
   }
 
-  private _onClickButton(
-    roomId: string,
-    playerId: string,
-    buttonPayload: ButtonPayload,
-  ) {
-    if (!roomId || !playerId || !buttonPayload) {
+  private _onClickButton(roomId: string, buttonPayload: ButtonPayload) {
+    if (!roomId || !buttonPayload) {
       this._sendError(
         "onClickButton",
         "There was an issue, please try again",
@@ -151,14 +134,13 @@ export class SocketManager {
       );
       return;
     }
-    //const session = SocketManager._activeGames[roomId];
     this._io.sockets
       .in(roomId)
       .emit(SocketEvents.BUTTON_CLICKED, buttonPayload);
   }
 
-  private _generateSequence(roomId: string, playerId: string) {
-    if (!roomId || !playerId) {
+  private _generateSequence(roomId: string) {
+    if (!roomId) {
       this._sendError(
         "generateSequence",
         "There was an issue, please try again",
@@ -181,8 +163,8 @@ export class SocketManager {
     this._io.sockets.in(roomId).emit(SocketEvents.SEQUENCE_GENERATED, n);
   }
 
-  private _onGameLeave(roomId: string, playerId: string) {
-    if (!roomId || !playerId) {
+  private _onGameLeave(roomId: string, host: boolean | null) {
+    if (!roomId || host === null) {
       this._sendError(
         "onGameLeave",
         "There was an issue, please try again",
@@ -198,13 +180,13 @@ export class SocketManager {
       );
       return;
     }
-    this._io.sockets.in(roomId).emit(SocketEvents.DISBAND_GAME, playerId);
+    this._io.sockets.in(roomId).emit(SocketEvents.DISBAND_GAME, {});
     delete SocketManager._activeGames[roomId];
     console.log(`${roomId} removed`);
   }
 
-  private _onRoomLeave(roomId: string, playerId: string) {
-    if (!roomId || !playerId) {
+  private _onRoomLeave(roomId: string, host: boolean | null) {
+    if (!roomId || host === null) {
       this._sendError(
         "onRoomLeave",
         "There was an issue, please try again",
@@ -221,17 +203,15 @@ export class SocketManager {
       return;
     }
     const session = SocketManager._activeGames[roomId];
-    if (playerId === session.host) {
-      this._io.sockets.in(roomId).emit(SocketEvents.DISBAND_GAME, playerId);
+    if (host) {
+      this._io.sockets.in(roomId).emit(SocketEvents.DISBAND_GAME, {});
       delete SocketManager._activeGames[roomId];
       console.log(`${roomId} removed`);
-    } else if (session.players.includes(playerId)) {
-      session.removePlayer(playerId);
+    } else {
+      session.removePlayer();
       this._socket.leave(roomId);
-      this._io.sockets
-        .in(roomId)
-        .emit(SocketEvents.PLAYER_LEFT_LOBBY, playerId);
-    } else this._socket.leave(roomId);
+      this._io.sockets.in(roomId).emit(SocketEvents.PLAYER_LEFT_LOBBY, {});
+    }
   }
 
   private _onGameOver(roomId: string) {
@@ -253,8 +233,6 @@ export class SocketManager {
     }
     const session = SocketManager._activeGames[roomId];
     const payload: GameOverPayload = {
-      players: session.players,
-      host: session.host,
       gameMode: session.gameMode,
       score: session.score,
     };

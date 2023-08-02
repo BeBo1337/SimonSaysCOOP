@@ -18,7 +18,7 @@ export interface SocketError {
 export default class SocketManager {
     private static _instance: SocketManager
     private _roomId: string | null = null
-    private _playerId: string | null = null
+    //private _playerId: string | null = null
     private _isHost: boolean = false
 
     public static get instance() {
@@ -40,9 +40,9 @@ export default class SocketManager {
     public get roomId() {
         return this._roomId || null
     }
-    public get playerId() {
-        return this._playerId || null
-    }
+    // public get playerId() {
+    //     return this._playerId || null
+    // }
     public get isHost() {
         return this._isHost
     }
@@ -109,20 +109,20 @@ export default class SocketManager {
     }
 
     private _createRoom(data: any) {
-        const { playerId, gameMode } = data
-        this._playerId = playerId
-        this._socket.emit(SocketEvents.CREATE_ROOM, playerId, gameMode)
+        const { gameMode } = data
+        //this._playerId = playerId
+        this._socket.emit(SocketEvents.CREATE_ROOM, gameMode)
     }
 
     private _joinRoom(data: any) {
-        const { roomId, playerId } = data
-        this._playerId = playerId
-        this._socket.emit(SocketEvents.JOIN_ROOM, roomId, playerId)
+        const { roomId } = data
+        //this._playerId = playerId
+        this._socket.emit(SocketEvents.JOIN_ROOM, roomId)
     }
 
     private _startGame(data: any) {
-        const { roomId, playerId } = data
-        this._socket.emit(SocketEvents.START_GAME, roomId, playerId)
+        const { roomId } = data
+        this._socket.emit(SocketEvents.START_GAME, roomId, this._isHost)
     }
 
     private _onDisconnect() {
@@ -133,30 +133,30 @@ export default class SocketManager {
         this._socket.emit(
             SocketEvents.CLICK_BUTTON,
             this._roomId,
-            this._playerId,
             buttonPayload
         )
     }
 
     private _generateSequence() {
         if (this._isHost)
-            this._socket.emit(
-                SocketEvents.GENERATE_SEQUENCE,
-                this._roomId,
-                this._playerId
-            )
+            this._socket.emit(SocketEvents.GENERATE_SEQUENCE, this._roomId)
     }
 
-    private _onGameLeave(playerId: string) {
-        this._socket.emit(SocketEvents.ON_GAME_LEAVE, this._roomId, playerId)
+    private _onGameLeave() {
+        this._socket.emit(
+            SocketEvents.ON_GAME_LEAVE,
+            this._roomId,
+            this._isHost
+        )
     }
 
     private _onRoomLeave() {
-        this._socket.emit(SocketEvents.LEAVE_ROOM, this._roomId, this._playerId)
+        this._socket.emit(SocketEvents.LEAVE_ROOM, this._roomId)
     }
 
     private _onGameOver() {
-        if (this._isHost) this._socket.emit(SocketEvents.GAMEOVER, this._roomId)
+        if (this._isHost)
+            this._socket.emit(SocketEvents.GAMEOVER, this._roomId, this._isHost)
     }
     //#endregion
 
@@ -183,6 +183,7 @@ export default class SocketManager {
     }
 
     private _gameStarted() {
+        debugger
         this._eventsManager.trigger(SocketEvents.GAME_STARTED, {})
     }
 
@@ -194,15 +195,17 @@ export default class SocketManager {
         this._eventsManager.trigger(SocketEvents.SEQUENCE_GENERATED, n)
     }
 
-    private _disbandGame(playerID: string) {
-        this._isHost = false
-        this._playerId = null
+    private _disbandGame() {
         this._roomId = null
-        this._eventsManager.trigger(SocketEvents.DISBAND_GAME, playerID)
+        this._isHost = false
+        this._eventsManager.trigger(SocketEvents.DISBAND_GAME, this._isHost)
     }
 
-    private _onPlayerLeft(playerId: string) {
-        this._eventsManager.trigger(SocketEvents.PLAYER_LEFT_LOBBY, playerId)
+    private _onPlayerLeft() {
+        this._eventsManager.trigger(
+            SocketEvents.PLAYER_LEFT_LOBBY,
+            this._isHost
+        )
     }
 
     private _gameOverReturn(p: GameOverPayload) {

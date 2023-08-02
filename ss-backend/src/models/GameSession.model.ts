@@ -3,7 +3,7 @@ import { Modes } from "../utils/GameConstants";
 export interface Game {
   roomId: string;
   score: number;
-  players: string[];
+  playerCount: number;
   gameMode: number;
   sequence: number[];
 }
@@ -11,15 +11,13 @@ export interface Game {
 export class GameSession implements Game {
   roomId: string = "";
   score: number = -1;
-  players: string[] = [];
+  playerCount: number = 0;
   gameMode: number = 0;
   sequence: number[] = [];
-  host: string = "";
 
-  constructor(roomId: string, players: string[], gameMode: number) {
-    this.host = players[0];
+  constructor(roomId: string, gameMode: number) {
     this.roomId = roomId;
-    this.players = players;
+    this.playerCount = 1;
     this.gameMode = gameMode;
   }
 
@@ -27,18 +25,15 @@ export class GameSession implements Game {
     this.score++;
   }
 
-  addPlayer(playerId: string) {
-    this.players.push(playerId);
+  addPlayer() {
+    this.playerCount++;
   }
 
   addToSequence(n: number) {
     this.sequence = [...this.sequence, n];
   }
 
-  removePlayer(playerId: string) {
-    const index = this.players.findIndex((player) => player === playerId);
-    if (index !== -1) {
-      this.players.splice(index, 1);
-    }
+  removePlayer() {
+    this.playerCount--;
   }
 }

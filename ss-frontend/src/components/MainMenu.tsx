@@ -11,19 +11,17 @@ import { SocketEvents } from '../services/SocketEvents'
 
 interface MainMenuProps {
     setGameMode: Function
-    // setPlayerID: Function
+    setHost: Function
 }
 
 const MainMenu: FC<MainMenuProps> = ({
-    setGameMode
-}: // setPlayerID
-MainMenuProps) => {
+    setGameMode,
+    setHost
+}: MainMenuProps) => {
     const [mode, setMode] = useState(0)
-    const [name, setName] = useState<string>('')
 
     const [modalMsg, setModalMsg] = useState<string>('')
     const [showModal, setShowModal] = useState(false)
-    const [isNameError, setIsNameError] = useState(false)
     const [isModeError, setIsModeError] = useState(false)
 
     const navigate = useNavigate()
@@ -41,43 +39,16 @@ MainMenuProps) => {
         }
     }
 
-    const checkName = (name: string): boolean => {
-        const englishAndNumbersRegex = /^[A-Za-z0-9]+$/
-
-        return englishAndNumbersRegex.test(name)
-    }
-
     const handleClick = () => {
-        if (!name && !mode) {
-            setIsNameError(true)
+        if (!mode) {
             setIsModeError(true)
-        } else if (!checkName(name)) {
-            setShowModal(true)
-            setModalMsg('bruh')
-            setIsNameError(true)
-            setIsModeError(false)
-        } else if (name.length < 3) {
-            setShowModal(true)
-            setModalMsg('bruh')
-            setIsNameError(true)
-            setIsModeError(false)
-        } else if (name.length > 8) {
-            setShowModal(true)
-            setModalMsg('bruh')
-            setIsNameError(true)
-            setIsModeError(false)
-        } else if (!mode) {
-            setIsNameError(false)
-            setIsModeError(true)
-        } else if (!isModeError && !isNameError) {
+        } else if (!isModeError) {
             EventsManager.instance.trigger(SocketEvents.CREATE_ROOM, {
-                playerId: name,
                 gameMode: mode
             })
         }
 
         setTimeout(() => {
-            setIsNameError(false)
             setIsModeError(false)
         }, 1000)
     }
@@ -85,7 +56,7 @@ MainMenuProps) => {
     const onRoomCreated = (p: CreateRoomPayload) => {
         console.log(p)
         setGameMode(p.gameMode)
-        //setPlayerID(p.host)
+        setHost(true)
 
         if (p.gameMode === Modes.CO_OP) {
             setTimeout(() => {
@@ -120,10 +91,6 @@ MainMenuProps) => {
         setModalMsg('')
     }
 
-    const handleNameChange = (event: ChangeEvent<HTMLInputElement>) => {
-        setName(event.target.value)
-    }
-
     return (
         <>
             {showModal && (
@@ -135,18 +102,7 @@ MainMenuProps) => {
                 </div>
 
                 <h1>Welcome to SimonSays</h1>
-                <form>
-                    <input
-                        className={isNameError ? 'inputError' : ''}
-                        name="players-name"
-                        type="text"
-                        placeholder="Enter your name..."
-                        value={name}
-                        maxLength={8}
-                        minLength={3}
-                        onChange={handleNameChange}
-                    ></input>
-                </form>
+
                 <button onClick={handleClick}>
                     {mode !== Modes.CO_OP ? 'Start Game' : 'Create Game'}
                 </button>
