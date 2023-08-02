@@ -9,7 +9,7 @@ import MsgModal from './components/MsgModal'
 import SocketManager from './services/SocketManager'
 import EventsManager from './services/EventsManager'
 import { SocketEvents } from './services/SocketEvents'
-import { Routes, Route } from 'react-router-dom'
+import { Routes, Route, useNavigate } from 'react-router-dom'
 import PreGameScreen from './components/PregameScreen'
 
 function App() {
@@ -17,6 +17,8 @@ function App() {
     const [isHost, setIsHost] = useState<boolean | null>(false)
     const [modalMsg, setModalMsg] = useState<string>('')
     const [showModal, setShowModal] = useState(false)
+
+    const navigate = useNavigate()
 
     useEffect(() => {
         const eventManager = EventsManager.instance
@@ -42,13 +44,37 @@ function App() {
         []
     )
 
+    const handleDisbandGame = () => {
+        navigate('/')
+        setModalMsg('Player left, game disbanded!')
+        setShowModal(true)
+    }
+
+    const failedToJoin = () => {
+        navigate('/')
+        setModalMsg("Failed to join or room doesn't exist")
+        setShowModal(true)
+    }
+
+    const handleCloseModal = () => {
+        setModalMsg('')
+        setShowModal(false)
+    }
+
     return (
         <>
+            {showModal && (
+                <MsgModal onClose={handleCloseModal} msg={modalMsg} />
+            )}
             <Routes>
                 <Route
                     path="/game"
                     element={
-                        <GameManager gameMode={gameMode} isHost={isHost} />
+                        <GameManager
+                            gameMode={gameMode}
+                            isHost={isHost}
+                            handleDisband={handleDisbandGame}
+                        />
                     }
                 />
                 <Route
@@ -62,11 +88,21 @@ function App() {
                 />
                 <Route
                     path="/create/*"
-                    element={<PreGameScreen isHost={isHost} />}
+                    element={
+                        <PreGameScreen
+                            isHost={isHost}
+                            handleFailToJoin={failedToJoin}
+                        />
+                    }
                 />
                 <Route
                     path="/join/*"
-                    element={<PreGameScreen isHost={isHost} />}
+                    element={
+                        <PreGameScreen
+                            isHost={isHost}
+                            handleFailToJoin={failedToJoin}
+                        />
+                    }
                 />
             </Routes>
         </>

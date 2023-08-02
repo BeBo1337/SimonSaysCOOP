@@ -15,14 +15,15 @@ import { ButtonPayload } from '../payloads/ButtonPayload'
 interface GameManagerProps {
     gameMode: number
     isHost: boolean | null
-    //   score: number;
+    handleDisband: Function
     //   setScore: Function;
     //   goBack: Function;
 }
 
 const GameManager: FC<GameManagerProps> = ({
     gameMode,
-    isHost
+    isHost,
+    handleDisband
 }: GameManagerProps) => {
     const [gameOver, setGameOver] = useState<boolean>(false)
     const [showGameOverMessage, setShowGameOverMessage] =
@@ -58,6 +59,7 @@ const GameManager: FC<GameManagerProps> = ({
 
         //Server response function
         const handleButtonClicked = (p: ButtonPayload) => {
+            console.log(sequenceIndexRef.current)
             if (sequence[p.currentSeqIndex] === p.buttonColor) {
                 sequenceIndexRef.current += 1
                 if (sequenceIndexRef.current >= sequence.length) {
@@ -97,8 +99,7 @@ const GameManager: FC<GameManagerProps> = ({
                 ' with index ' +
                 sequenceIndexRef.current
         )
-
-        EventsManager.instance.trigger(SocketEvents.BUTTON_CLICKED, {
+        EventsManager.instance.trigger(SocketEvents.CLICK_BUTTON, {
             buttonColor: buttonPressed,
             currentSeqIndex: sequenceIndexRef.current
         } as ButtonPayload)
@@ -145,6 +146,20 @@ const GameManager: FC<GameManagerProps> = ({
             handleSequenceGen
         )
 
+        EventsManager.instance.on(
+            SocketEvents.GAME_RESTARTED,
+            'GameManager',
+            handleTryAgain
+        )
+
+        EventsManager.instance.on(
+            SocketEvents.DISBAND_GAME,
+            'GameManager',
+            handleDisbandGame
+        )
+
+        window.addEventListener('beforeunload', triggerDisband)
+
         setTimeout(() => {
             sequenceIndexRef.current = 0
             if (SocketManager.instance.isHost) {
@@ -168,9 +183,30 @@ const GameManager: FC<GameManagerProps> = ({
                 SocketEvents.SEQUENCE_GENERATED,
                 'GameManager'
             )
+
+            EventsManager.instance.off(
+                SocketEvents.GAME_RESTARTED,
+                'GameManager'
+            )
+
+            EventsManager.instance.off(SocketEvents.DISBAND_GAME, 'GameManager')
+
+            window.removeEventListener('beforeunload', triggerDisband)
         },
         []
     )
+
+    const triggerDisband = () => {
+        EventsManager.instance.trigger(SocketEvents.ON_GAME_LEAVE, {})
+    }
+
+    const handleDisbandGame = () => {
+        handleDisband()
+    }
+
+    const handleRestart = () => {
+        EventsManager.instance.trigger(SocketEvents.RESTART_GAME, {})
+    }
 
     const handleTryAgain = () => {
         setGameOver(false)
@@ -269,12 +305,14 @@ const GameManager: FC<GameManagerProps> = ({
                     <div className="gameOverContainer">
                         <div className="gameOverMessage">
                             <p>{`You scored: ${score}. Try again?`}</p>
-                            <button
-                                className="gameOverButton"
-                                onClick={handleTryAgain}
-                            >
-                                Try Again
-                            </button>
+                            {isHost && (
+                                <button
+                                    className="gameOverButton"
+                                    onClick={handleRestart}
+                                >
+                                    Try Again
+                                </button>
+                            )}
                         </div>
                     </div>
                 </>

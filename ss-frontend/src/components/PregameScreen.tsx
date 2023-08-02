@@ -12,9 +12,10 @@ import SocketManager from '../services/SocketManager'
 
 interface PreGameScreenProps {
     isHost: boolean | null
+    handleFailToJoin: Function
 }
 
-function PreGameScreen({ isHost }: PreGameScreenProps) {
+function PreGameScreen({ isHost, handleFailToJoin }: PreGameScreenProps) {
     const [modalMsg, setModalMsg] = useState<string>('')
     const [showModal, setShowModal] = useState(false)
     const [canStart, setCanStart] = useState(false)
@@ -32,6 +33,8 @@ function PreGameScreen({ isHost }: PreGameScreenProps) {
     const onRoomJoined = (p: JoinRoomPayload) => {
         if (p.playerJoined) {
             setCanStart(true)
+        } else {
+            EventsManager.instance.trigger(SocketEvents.ON_GAME_LEAVE, {})
         }
     }
 
@@ -151,17 +154,26 @@ function PreGameScreen({ isHost }: PreGameScreenProps) {
                 <div className={`logoContainer`}>
                     <img src={svgLogo} alt="Logo" />
                 </div>
-
                 <h1>Welcome to SimonSays</h1>
-                {!canStart ? (
+                {!canStart && isHost ? (
                     <div className="">
                         <h2>Waiting for player to join...</h2>
                     </div>
                 ) : (
+                    ''
+                )}
+                {canStart ? (
                     <div className="">
                         <p>Player Joined!</p>
                         {!isHost && <p>Waiting to start...</p>}
                     </div>
+                ) : (
+                    ''
+                )}
+                {!isHost && !SocketManager.instance.roomId ? (
+                    <div className="">Failed to join, try getting new link</div>
+                ) : (
+                    ''
                 )}
                 {isHost && (
                     <button

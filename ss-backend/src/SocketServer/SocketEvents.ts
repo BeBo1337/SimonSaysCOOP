@@ -9,6 +9,7 @@ enum EventsSocketReceives {
   GENERATE_SEQUENCE = "generate_sequence",
   ON_GAME_LEAVE = "on_game_leave",
   LEAVE_ROOM = "on_room_leave",
+  RESTART_GAME = "restart_game",
   GAMEOVER = "gameover",
 }
 
@@ -24,6 +25,7 @@ enum EventsSocketEmits {
   SEQUENCE_GENERATED = "sequence_generated",
   DISBAND_GAME = "disband_game",
   PLAYER_LEFT_LOBBY = "player_left_lobby",
+  GAME_RESTARTED = "game_restarted",
   GAMEOVER_RET = "gameover_ret",
 }
 

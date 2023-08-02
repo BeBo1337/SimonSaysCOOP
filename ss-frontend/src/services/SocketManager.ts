@@ -64,6 +64,7 @@ export default class SocketManager {
             [SocketEvents.GENERATE_SEQUENCE]: this._generateSequence.bind(this),
             [SocketEvents.ON_GAME_LEAVE]: this._onGameLeave.bind(this),
             [SocketEvents.LEAVE_ROOM]: this._onRoomLeave.bind(this),
+            [SocketEvents.RESTART_GAME]: this._onRestartGame.bind(this),
             [SocketEvents.GAMEOVER]: this._onGameOver.bind(this)
         }
 
@@ -78,6 +79,7 @@ export default class SocketManager {
                 this._sequenceGenerated.bind(this),
             [SocketEvents.DISBAND_GAME]: this._disbandGame.bind(this),
             [SocketEvents.PLAYER_LEFT_LOBBY]: this._onPlayerLeft.bind(this),
+            [SocketEvents.GAME_RESTARTED]: this._gameRestarted.bind(this),
             [SocketEvents.GAMEOVER_RET]: this._gameOverReturn.bind(this)
         }
 
@@ -154,6 +156,11 @@ export default class SocketManager {
         this._socket.emit(SocketEvents.LEAVE_ROOM, this._roomId)
     }
 
+    private _onRestartGame() {
+        if (this._isHost)
+            this._socket.emit(SocketEvents.RESTART_GAME, this._roomId)
+    }
+
     private _onGameOver() {
         if (this._isHost)
             this._socket.emit(SocketEvents.GAMEOVER, this._roomId, this._isHost)
@@ -183,7 +190,6 @@ export default class SocketManager {
     }
 
     private _gameStarted() {
-        debugger
         this._eventsManager.trigger(SocketEvents.GAME_STARTED, {})
     }
 
@@ -197,8 +203,8 @@ export default class SocketManager {
 
     private _disbandGame() {
         this._roomId = null
-        this._isHost = false
         this._eventsManager.trigger(SocketEvents.DISBAND_GAME, this._isHost)
+        this._isHost = false
     }
 
     private _onPlayerLeft() {
@@ -206,6 +212,10 @@ export default class SocketManager {
             SocketEvents.PLAYER_LEFT_LOBBY,
             this._isHost
         )
+    }
+
+    private _gameRestarted() {
+        this._eventsManager.trigger(SocketEvents.GAME_RESTARTED, {})
     }
 
     private _gameOverReturn(p: GameOverPayload) {

@@ -25,6 +25,11 @@ export class GameSession implements Game {
     this.score++;
   }
 
+  restartGame(): void {
+    this.sequence = [];
+    this.score = -1;
+  }
+
   addPlayer() {
     this.playerCount++;
   }

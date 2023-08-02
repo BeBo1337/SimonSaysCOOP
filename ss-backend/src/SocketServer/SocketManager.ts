@@ -33,6 +33,7 @@ export class SocketManager {
       [SocketEvents.GENERATE_SEQUENCE]: this._generateSequence.bind(this),
       [SocketEvents.ON_GAME_LEAVE]: this._onGameLeave.bind(this),
       [SocketEvents.LEAVE_ROOM]: this._onRoomLeave.bind(this),
+      [SocketEvents.RESTART_GAME]: this._restartGame.bind(this),
       [SocketEvents.GAMEOVER]: this._onGameOver.bind(this),
     };
 
@@ -161,6 +162,28 @@ export class SocketManager {
     session.incrementScore();
     session.addToSequence(n);
     this._io.sockets.in(roomId).emit(SocketEvents.SEQUENCE_GENERATED, n);
+  }
+
+  private _restartGame(roomId: string) {
+    if (!roomId) {
+      this._sendError(
+        "restartGame",
+        "There was an issue, please try again",
+        "Missing Variables",
+      );
+      return;
+    }
+    if (!this._roomExists(roomId)) {
+      this._sendError(
+        "restartGame",
+        "There was an issue, please try again",
+        `This room ${roomId} does not exist.`,
+      );
+      return;
+    }
+    const session = SocketManager._activeGames[roomId];
+    session.restartGame();
+    this._io.sockets.in(roomId).emit(SocketEvents.GAME_RESTARTED, {});
   }
 
   private _onGameLeave(roomId: string, host: boolean | null) {
