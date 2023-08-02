@@ -14,6 +14,8 @@ export class GameSession implements Game {
   playerCount: number = 0;
   gameMode: number = 0;
   sequence: number[] = [];
+  whichSideStreak = 0;
+  sameSideStreak = 0;
 
   constructor(roomId: string, gameMode: number) {
     this.roomId = roomId;
@@ -23,6 +25,18 @@ export class GameSession implements Game {
 
   incrementScore(): void {
     this.score++;
+  }
+
+  increaseSameSideStreak(): void {
+    this.sameSideStreak++;
+  }
+
+  resetSameSideStreak(): void {
+    this.sameSideStreak = 1;
+  }
+
+  setSideStreak(side: number): void {
+    this.whichSideStreak = side;
   }
 
   restartGame(): void {

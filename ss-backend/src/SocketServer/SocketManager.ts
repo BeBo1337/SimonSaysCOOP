@@ -158,9 +158,7 @@ export class SocketManager {
       return;
     }
     const session = SocketManager._activeGames[roomId];
-    let n = setNextLevel(session.gameMode);
-    session.incrementScore();
-    session.addToSequence(n);
+    let n = setNextLevel(session);
     this._io.sockets.in(roomId).emit(SocketEvents.SEQUENCE_GENERATED, n);
   }
 
