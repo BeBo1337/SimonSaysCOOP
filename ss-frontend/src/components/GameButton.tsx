@@ -8,7 +8,7 @@ interface ButtonProps {
     colorNumber?: number
     handleButtonPressed?: Function
     clickable: boolean
-    gameOver: boolean
+    gameOver: number
 }
 
 const GameButton: FC<ButtonProps> = ({
@@ -48,11 +48,11 @@ const GameButton: FC<ButtonProps> = ({
     }, [glowing])
 
     useEffect(() => {
-        if (gameOver) {
+        if (gameOver > 0) {
             if (colorNumber) setClassName(`btn glowing wrong`)
             else setClassName(`btn-coop glowing wrong`)
         }
-        if (!gameOver) {
+        if (gameOver === 0) {
             setClassName(initialClassName)
         }
     }, [gameOver])

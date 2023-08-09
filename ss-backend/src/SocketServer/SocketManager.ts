@@ -135,6 +135,13 @@ export class SocketManager {
       );
       return;
     }
+    const session = SocketManager._activeGames[roomId];
+    if (session.gameOver) return;
+
+    session.currIndex = buttonPayload.currentSeqIndex;
+    if (session.sequence[session.currIndex] !== buttonPayload.buttonColor)
+      session.setGameOver();
+
     this._io.sockets
       .in(roomId)
       .emit(SocketEvents.BUTTON_CLICKED, buttonPayload);
@@ -158,6 +165,7 @@ export class SocketManager {
       return;
     }
     const session = SocketManager._activeGames[roomId];
+    if (session.gameOver) return;
     let n = setNextLevel(session);
     this._io.sockets.in(roomId).emit(SocketEvents.SEQUENCE_GENERATED, n);
   }
@@ -184,8 +192,8 @@ export class SocketManager {
     this._io.sockets.in(roomId).emit(SocketEvents.GAME_RESTARTED, {});
   }
 
-  private _onGameLeave(roomId: string, host: boolean | null) {
-    if (!roomId || host === null) {
+  private _onGameLeave(roomId: string, host: boolean) {
+    if (!roomId || (host !== false && host !== true)) {
       this._sendError(
         "onGameLeave",
         "There was an issue, please try again",

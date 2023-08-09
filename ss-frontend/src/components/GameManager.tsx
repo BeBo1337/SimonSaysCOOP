@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import GameButton from './GameButton'
 import '../assets/styles.scss'
 import wrong from '../assets/sounds/Wrong.mp3'
-import { getNumberInRange } from '../utils/GenericFuncs'
+import seq from '../assets/sounds/Sequence.mp3'
 import { ColorNumbers } from '../utils/ColorsConstants'
 import { Modes } from '../utils/GameConstants'
 
@@ -25,10 +25,10 @@ const GameManager: FC<GameManagerProps> = ({
     isHost,
     handleDisband
 }: GameManagerProps) => {
-    const [gameOver, setGameOver] = useState<boolean>(false)
+    const gameOver = useRef<number>(0)
     const [showGameOverMessage, setShowGameOverMessage] =
         useState<boolean>(false)
-    const [pauseClicks, setPauseClicks] = useState<boolean>(false)
+    const [pauseClicks, setPauseClicks] = useState<boolean>(true)
     const [score, setScore] = useState<number>(0)
     const [sequence, setSequence] = useState<number[]>([])
     const sequenceIndexRef = useRef<number>(-1)
@@ -36,10 +36,21 @@ const GameManager: FC<GameManagerProps> = ({
 
     const navigate = useNavigate()
     const wrongSound = new Audio(wrong)
+    const seqSound = new Audio(seq)
 
     const showSequence = async () => {
+        if (gameOver.current > 0) {
+            gameOver.current++
+            return
+        }
         for (const num of sequence) {
+            if (gameOver.current > 0) {
+                gameOver.current++
+                return
+            }
+
             console.log('HI ' + num)
+            seqSound.play()
             setGlowingButton(num)
 
             await new Promise((resolve) => setTimeout(resolve, 300))
@@ -50,7 +61,7 @@ const GameManager: FC<GameManagerProps> = ({
     }
 
     useEffect(() => {
-        if (sequence) {
+        if (sequence.length > 0) {
             setPauseClicks(true)
             showSequence().then(() => {
                 setPauseClicks(false)
@@ -59,6 +70,7 @@ const GameManager: FC<GameManagerProps> = ({
 
         //Server response function
         const handleButtonClicked = (p: ButtonPayload) => {
+            if (p.gameOver) return
             console.log(sequenceIndexRef.current)
             if (sequence[p.currentSeqIndex] === p.buttonColor) {
                 sequenceIndexRef.current += 1
@@ -67,7 +79,7 @@ const GameManager: FC<GameManagerProps> = ({
                     setScore((prevScore) => prevScore + 1)
                 }
             } else {
-                setGameOver(true)
+                gameOver.current++
                 wrongSound.play()
                 setShowGameOverMessage(true)
                 console.log('game over')
@@ -92,17 +104,19 @@ const GameManager: FC<GameManagerProps> = ({
 
     //frontend press trigger emit to server
     const handleButtonPressed = (buttonPressed: number) => {
-        if (gameOver) return
-        console.log(
-            'buttonPressed ' +
-                buttonPressed +
-                ' with index ' +
-                sequenceIndexRef.current
-        )
-        EventsManager.instance.trigger(SocketEvents.CLICK_BUTTON, {
-            buttonColor: buttonPressed,
-            currentSeqIndex: sequenceIndexRef.current
-        } as ButtonPayload)
+        if (gameOver.current === 0) {
+            console.log(gameOver.current)
+            console.log(
+                'buttonPressed ' +
+                    buttonPressed +
+                    ' with index ' +
+                    sequenceIndexRef.current
+            )
+            EventsManager.instance.trigger(SocketEvents.CLICK_BUTTON, {
+                buttonColor: buttonPressed,
+                currentSeqIndex: sequenceIndexRef.current
+            } as ButtonPayload)
+        }
     }
 
     useEffect(() => {
@@ -127,7 +141,8 @@ const GameManager: FC<GameManagerProps> = ({
     }
 
     const handleSequenceGen = (n: number) => {
-        setSequence((prevSequence) => [...prevSequence, n])
+        if (gameOver.current === 0)
+            setSequence((prevSequence) => [...prevSequence, n])
     }
 
     // onMount
@@ -174,6 +189,7 @@ const GameManager: FC<GameManagerProps> = ({
     // onBeforeDestroy
     useEffect(
         () => () => {
+            triggerDisband()
             EventsManager.instance.off(
                 SocketEvents.BUTTON_CLICKED,
                 'GameManager'
@@ -209,9 +225,10 @@ const GameManager: FC<GameManagerProps> = ({
     }
 
     const handleTryAgain = () => {
-        setGameOver(false)
+        gameOver.current = 0
         setScore(0)
         setSequence([])
+        setPauseClicks(true)
         setShowGameOverMessage(false)
 
         setTimeout(() => {
@@ -235,7 +252,7 @@ const GameManager: FC<GameManagerProps> = ({
                         initialClassName="btn-coop"
                         glowing={indicator()}
                         clickable={false}
-                        gameOver={gameOver}
+                        gameOver={gameOver.current}
                     />
                 )}
                 <div className="game-buttons-container">
@@ -250,8 +267,8 @@ const GameManager: FC<GameManagerProps> = ({
                             isHost ? ColorNumbers.Green : ColorNumbers.Lime
                         }
                         handleButtonPressed={handleButtonPressed}
-                        clickable={!pauseClicks && !gameOver}
-                        gameOver={gameOver}
+                        clickable={!pauseClicks && !gameOver.current}
+                        gameOver={gameOver.current}
                     />
                     <GameButton
                         initialClassName={isHost ? 'btn red' : 'btn pink'}
@@ -264,8 +281,8 @@ const GameManager: FC<GameManagerProps> = ({
                             isHost ? ColorNumbers.Red : ColorNumbers.Pink
                         }
                         handleButtonPressed={handleButtonPressed}
-                        clickable={!pauseClicks && !gameOver}
-                        gameOver={gameOver}
+                        clickable={!pauseClicks && !gameOver.current}
+                        gameOver={gameOver.current}
                     />
                     <GameButton
                         initialClassName={isHost ? 'btn yellow' : 'btn grey'}
@@ -278,8 +295,8 @@ const GameManager: FC<GameManagerProps> = ({
                             isHost ? ColorNumbers.Yellow : ColorNumbers.Grey
                         }
                         handleButtonPressed={handleButtonPressed}
-                        clickable={!pauseClicks && !gameOver}
-                        gameOver={gameOver}
+                        clickable={!pauseClicks && !gameOver.current}
+                        gameOver={gameOver.current}
                     />
                     <GameButton
                         initialClassName={isHost ? 'btn blue' : 'btn cyan'}
@@ -292,8 +309,8 @@ const GameManager: FC<GameManagerProps> = ({
                             isHost ? ColorNumbers.Blue : ColorNumbers.Cyan
                         }
                         handleButtonPressed={handleButtonPressed}
-                        clickable={!pauseClicks && !gameOver}
-                        gameOver={gameOver}
+                        clickable={!pauseClicks && !gameOver.current}
+                        gameOver={gameOver.current}
                     />
                 </div>
             </div>
@@ -304,7 +321,12 @@ const GameManager: FC<GameManagerProps> = ({
                 <>
                     <div className="gameOverContainer">
                         <div className="gameOverMessage">
-                            <p>{`You scored: ${score}. Try again?`}</p>
+                            <p style={{ whiteSpace: 'pre-line' }}>
+                                Game-Over! <br />
+                                Your score: <br />
+                                {score} <br />
+                                Try again?
+                            </p>
                             {isHost && (
                                 <button
                                     className="gameOverButton"

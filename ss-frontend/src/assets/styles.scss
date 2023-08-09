@@ -147,12 +147,6 @@ h1 {
         p {
             font-size: 28px;
         }
-        form {
-            input {
-                min-width: 0px;
-                padding: 10px;
-            }
-        }
     }
 }
 
@@ -169,15 +163,7 @@ h1 {
 
         p {
             font-size: 28px;
-            width: 90vw;
-        }
-        form {
-            input {
-                min-width: 0px;
-                width: 90vw;
-                padding: 10px;
-                font-size: 20px;
-            }
+            width: 80vw;
         }
         button {
             width: 100%;
@@ -186,5 +172,72 @@ h1 {
     .gameOverContainer {
         min-height: 250px;
         min-width: 250px;
+    }
+    .btn {
+        margin: 24px;
+    }
+    .btn-coop {
+        max-width: 480px;
+        min-width: 480px;
+    }
+    .buttons-container {
+        width: 90vw;
+        .game-buttons-container {
+            grid-template-columns: 280px;
+        }
+    }
+}
+
+@media (max-width: 768px) {
+    .mainMenuContainer {
+        .logoContainer {
+            img {
+                min-width: 0px;
+                width: 50vw;
+            }
+        }
+        padding-top: 10vh;
+        padding-bottom: 10vh;
+    }
+    .btn {
+        scale: 0.8;
+        margin: 8px;
+    }
+    .btn-coop {
+        scale: 0.8;
+    }
+    .buttons-container {
+        .game-buttons-container {
+            grid-template-columns: 230px;
+        }
+    }
+}
+
+@media (max-width: 478px) {
+    .mainMenuContainer {
+        padding-top: 5vh;
+        padding-bottom: 0vh;
+        h1 {
+            font-size: 25px;
+        }
+        p {
+            font-size: 16px;
+            width: 70vw;
+        }
+        button {
+            font-size: 16px;
+        }
+    }
+    .btn {
+        scale: 0.7;
+        margin: -5px;
+    }
+    .btn-coop {
+        scale: 0.7;
+    }
+    .buttons-container {
+        .game-buttons-container {
+            grid-template-columns: 200px;
+        }
     }
 }

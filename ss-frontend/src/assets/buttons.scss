@@ -16,23 +16,6 @@
         grid-template-columns: 300px;
         justify-content: center;
     }
-
-    button {
-        font-family: 'Press Start 2P', cursive;
-        min-width: fit-content;
-        padding: 10px 20px;
-        width: 90%;
-        font-size: 30px;
-        border-radius: 20px;
-        border: 5px solid black;
-        &:hover {
-            background: linear-gradient(#e0b0b0, #e37e7e);
-            color: white;
-        }
-        &:active {
-            transform: scale(0.95) translateY(3px);
-        }
-    }
 }
 
 .btn {
@@ -66,6 +49,12 @@
 .game-over {
     background-color: red;
     opacity: 0.8;
+}
+
+.wrongy {
+    box-shadow: 0 0 20px rgb(255, 0, 0);
+    background-color: rgb(246, 248, 251);
+    border: 10px solid rgb(255, 132, 132);
 }
 
 .green {

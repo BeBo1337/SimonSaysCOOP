@@ -13,7 +13,9 @@ export class GameSession implements Game {
   score: number = -1;
   playerCount: number = 0;
   gameMode: number = 0;
+  gameOver: boolean = false;
   sequence: number[] = [];
+  currIndex = 0;
   whichSideStreak = 0;
   sameSideStreak = 0;
 
@@ -27,8 +29,16 @@ export class GameSession implements Game {
     this.score++;
   }
 
+  incrementSeqIndex(): void {
+    this.currIndex++;
+  }
+
   increaseSameSideStreak(): void {
     this.sameSideStreak++;
+  }
+
+  setGameOver(): void {
+    this.gameOver = true;
   }
 
   resetSameSideStreak(): void {
@@ -41,6 +51,8 @@ export class GameSession implements Game {
 
   restartGame(): void {
     this.sequence = [];
+    this.currIndex = 0;
+    this.gameOver = false;
     this.score = -1;
   }
 

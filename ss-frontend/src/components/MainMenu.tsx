@@ -8,6 +8,7 @@ import MsgModal from './MsgModal'
 import { CreateRoomPayload } from '../payloads/CreateRoomPayload'
 import EventsManager from '../services/EventsManager'
 import { SocketEvents } from '../services/SocketEvents'
+import SocketManager from '../services/SocketManager'
 
 interface MainMenuProps {
     setGameMode: Function
@@ -42,7 +43,7 @@ const MainMenu: FC<MainMenuProps> = ({
     const handleClick = () => {
         if (!mode) {
             setIsModeError(true)
-        } else if (!isModeError) {
+        } else if (!isModeError && !SocketManager.instance.roomId) {
             EventsManager.instance.trigger(SocketEvents.CREATE_ROOM, {
                 gameMode: mode
             })
