@@ -46,7 +46,7 @@ function App() {
 
     const handleDisbandGame = () => {
         navigate('/')
-        setModalMsg('Player left, game disbanded!')
+        setModalMsg('Player left, lobby disbanded!')
         setShowModal(true)
     }
 
@@ -92,6 +92,7 @@ function App() {
                         <PreGameScreen
                             isHost={isHost}
                             handleFailToJoin={failedToJoin}
+                            handleDisband={handleDisbandGame}
                         />
                     }
                 />
@@ -101,6 +102,7 @@ function App() {
                         <PreGameScreen
                             isHost={isHost}
                             handleFailToJoin={failedToJoin}
+                            handleDisband={handleDisbandGame}
                         />
                     }
                 />

@@ -114,8 +114,8 @@ h1 {
     .buttonDisabled {
         font-family: 'Bruno Ace', 'Segoe UI', Tahoma, Geneva, Verdana;
         min-width: fit-content;
-        padding: 10px 20px;
-        width: 80%;
+        padding: 10px;
+        width: 41vw;
         font-size: 30px;
         border-radius: 5px;
         border: none;
@@ -168,6 +168,9 @@ h1 {
         button {
             width: 100%;
         }
+        .buttonDisabled {
+            width: 100%;
+        }
     }
     .gameOverContainer {
         min-height: 250px;
@@ -193,7 +196,7 @@ h1 {
         .logoContainer {
             img {
                 min-width: 0px;
-                width: 50vw;
+                width: 40vw;
             }
         }
         padding-top: 10vh;
@@ -211,10 +214,21 @@ h1 {
             grid-template-columns: 230px;
         }
     }
+    .modalContent {
+        p {
+            font-size: 16px;
+        }
+    }
 }
 
 @media (max-width: 478px) {
     .mainMenuContainer {
+        .logoContainer {
+            img {
+                min-width: 0px;
+                width: 50vw;
+            }
+        }
         padding-top: 5vh;
         padding-bottom: 0vh;
         h1 {
@@ -225,6 +239,9 @@ h1 {
             width: 70vw;
         }
         button {
+            font-size: 16px;
+        }
+        .buttonDisabled {
             font-size: 16px;
         }
     }

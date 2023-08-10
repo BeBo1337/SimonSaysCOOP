@@ -190,10 +190,6 @@ const GameManager: FC<GameManagerProps> = ({
     useEffect(
         () => () => {
             triggerDisband()
-            EventsManager.instance.off(
-                SocketEvents.BUTTON_CLICKED,
-                'GameManager'
-            )
 
             EventsManager.instance.off(
                 SocketEvents.SEQUENCE_GENERATED,

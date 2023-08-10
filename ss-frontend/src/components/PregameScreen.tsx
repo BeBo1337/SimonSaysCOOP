@@ -2,7 +2,7 @@ import { useState, useEffect, ChangeEvent, useRef } from 'react'
 import { Link, Outlet, useNavigate, useSearchParams } from 'react-router-dom'
 import '../assets/styles.scss'
 import MsgModal from './MsgModal'
-import svgLogo from '../../public/SimonSaysLogo.png'
+import svgLogo from '../assets/SimonSaysLogo.png'
 import EventsManager from '../services/EventsManager'
 import { SocketEvents } from '../services/SocketEvents'
 import { JoinRoomPayload } from '../payloads/JoinRoomPayload'
@@ -13,17 +13,23 @@ import SocketManager from '../services/SocketManager'
 interface PreGameScreenProps {
     isHost: boolean | null
     handleFailToJoin: Function
+    handleDisband: Function
 }
 
-function PreGameScreen({ isHost, handleFailToJoin }: PreGameScreenProps) {
+function PreGameScreen({
+    isHost,
+    handleFailToJoin,
+    handleDisband
+}: PreGameScreenProps) {
     const [modalMsg, setModalMsg] = useState<string>('')
     const [showModal, setShowModal] = useState(false)
     const [canStart, setCanStart] = useState(false)
     const [searchParams, setSearchParams] = useSearchParams()
     const [roomToJoin, setRoomToJoin] = useState<string>('')
+    const startedRef = useRef<number>(0)
     const navigate = useNavigate()
-    const stateRef = useRef<any>()
-    stateRef.current = canStart
+    const canStartRef = useRef<any>()
+    canStartRef.current = canStart
 
     const handleCloseModal = () => {
         setShowModal(false)
@@ -38,20 +44,11 @@ function PreGameScreen({ isHost, handleFailToJoin }: PreGameScreenProps) {
         }
     }
 
-    const onPlayerLeft = () => {
-        setModalMsg('Player Left')
-        setShowModal(true)
-        setCanStart(false)
-    }
-
     const onGameStarted = () => {
-        if (stateRef.current) {
+        if (canStartRef.current) {
+            startedRef.current = 1
             navigate('/game')
         }
-    }
-
-    const handleBeforeUnload = () => {
-        EventsManager.instance.trigger(SocketEvents.LEAVE_ROOM, {})
     }
 
     useEffect(() => {
@@ -74,19 +71,19 @@ function PreGameScreen({ isHost, handleFailToJoin }: PreGameScreenProps) {
             onGameStarted
         )
 
-        EventsManager.instance.on(
-            SocketEvents.PLAYER_LEFT_LOBBY,
-            'PregameScreen',
-            onPlayerLeft
-        )
-
         // EventsManager.instance.on(
-        //     SocketEvents.DISBAND_GAME,
-        //     'PreGameScreen',
-        //     onDisbandGame
+        //     SocketEvents.PLAYER_LEFT_LOBBY,
+        //     'PregameScreen',
+        //     onPlayerLeft
         // )
 
-        window.addEventListener('beforeunload', handleBeforeUnload)
+        EventsManager.instance.on(
+            SocketEvents.DISBAND_GAME,
+            'GameManager',
+            handleDisbandGame
+        )
+
+        window.addEventListener('beforeunload', triggerDisband)
 
         if (isHost && !SocketManager.instance.roomId) {
             // toast.error('Please create/join a room to enter a game', {
@@ -105,6 +102,8 @@ function PreGameScreen({ isHost, handleFailToJoin }: PreGameScreenProps) {
     // onBeforeDestroy
     useEffect(
         () => () => {
+            if (!startedRef.current) triggerDisband()
+
             EventsManager.instance.off(
                 SocketEvents.ROOM_JOINED,
                 'PregameScreen'
@@ -119,10 +118,22 @@ function PreGameScreen({ isHost, handleFailToJoin }: PreGameScreenProps) {
                 SocketEvents.PLAYER_LEFT_LOBBY,
                 'PregameScreen'
             )
-            window.removeEventListener('beforeunload', handleBeforeUnload)
+
+            EventsManager.instance.off(SocketEvents.DISBAND_GAME, 'GameManager')
+
+            window.removeEventListener('beforeunload', triggerDisband)
         },
         []
     )
+
+    const triggerDisband = () => {
+        EventsManager.instance.trigger(SocketEvents.ON_GAME_LEAVE, {})
+    }
+
+    const handleDisbandGame = () => {
+        setCanStart(false)
+        handleDisband()
+    }
 
     const handleClick = () => {
         if (SocketManager.instance.isHost)
@@ -155,14 +166,14 @@ function PreGameScreen({ isHost, handleFailToJoin }: PreGameScreenProps) {
                     <img src={svgLogo} alt="Logo" />
                 </div>
                 <h1>Welcome to SimonSays</h1>
-                {!canStart && isHost ? (
+                {!canStartRef.current && isHost ? (
                     <div className="">
                         <h2>Waiting for player to join...</h2>
                     </div>
                 ) : (
                     ''
                 )}
-                {canStart ? (
+                {canStartRef.current ? (
                     <div className="">
                         <p>Player Joined!</p>
                         {!isHost && <p>Waiting to start...</p>}

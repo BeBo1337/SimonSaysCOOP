@@ -19,15 +19,13 @@
     background-color: rgb(61, 61, 61);
     color: rgb(255, 255, 255);
     border-radius: 20px;
-    p {
-        font-size: 2em;
-    }
 
     text-align: center;
     width: 50vw;
     height: fit-content;
     box-shadow: 0 2px 4px rgba(255, 255, 255, 0.2);
     .modalHeader {
+        font-size: 1.5em;
         button {
             border: none;
             border-radius: 50%;
@@ -54,6 +52,7 @@
     }
 
     .modalBody {
+        font-size: 2em;
         padding: 16px;
         display: flex;
         justify-content: center;
