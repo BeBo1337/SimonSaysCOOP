@@ -55,7 +55,6 @@ const MainMenu: FC<MainMenuProps> = ({
     }
 
     const onRoomCreated = (p: CreateRoomPayload) => {
-        console.log(p)
         setGameMode(p.gameMode)
         setHost(true)
 

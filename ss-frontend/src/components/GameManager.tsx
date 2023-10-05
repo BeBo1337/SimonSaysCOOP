@@ -47,7 +47,6 @@ const GameManager: FC<GameManagerProps> = ({
                 return
             }
 
-            console.log('HI ' + num)
             seqSound.play()
             setGlowingButton(num)
 
@@ -69,7 +68,6 @@ const GameManager: FC<GameManagerProps> = ({
         //Server response function
         const handleButtonClicked = (p: ButtonPayload) => {
             if (p.gameOver) return
-            console.log(sequenceIndexRef.current)
             if (sequence[p.currentSeqIndex] === p.buttonColor) {
                 sequenceIndexRef.current += 1
                 if (sequenceIndexRef.current >= sequence.length) {
@@ -103,13 +101,6 @@ const GameManager: FC<GameManagerProps> = ({
     //frontend press trigger emit to server
     const handleButtonPressed = (buttonPressed: number) => {
         if (gameOver.current === 0) {
-            console.log(gameOver.current)
-            console.log(
-                'buttonPressed ' +
-                    buttonPressed +
-                    ' with index ' +
-                    sequenceIndexRef.current
-            )
             EventsManager.instance.trigger(SocketEvents.CLICK_BUTTON, {
                 buttonColor: buttonPressed,
                 currentSeqIndex: sequenceIndexRef.current
