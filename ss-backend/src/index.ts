@@ -9,9 +9,13 @@ import { initializeSocketServer } from "./SocketServer/index";
 const app = express();
 const whitelist = [
   "https://admin.socket.io/",
-  "http://localhost:5173",
-  "http://127.0.0.1:5173",
+  "http://localhost:3000",
+  "http://127.0.0.1:3000",
 ];
+
+if (process.env.HOSTNAME) {
+  whitelist.push(process.env.HOSTNAME);
+}
 
 const corsOptions: cors.CorsOptions = {
   allowedHeaders: [
@@ -34,6 +38,14 @@ const corsOptions: cors.CorsOptions = {
 };
 
 app.use(cors(corsOptions));
+
+import path from "path";
+app.use(express.static(path.join(__dirname, "../public")));
+
+app.get("*", (req, res) => {
+  res.sendFile(path.join(__dirname, "../public", "index.html"));
+});
+
 const server = createServer(app);
 initializeSocketServer(server, corsOptions);
 

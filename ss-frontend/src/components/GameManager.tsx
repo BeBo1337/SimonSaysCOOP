@@ -16,8 +16,6 @@ interface GameManagerProps {
     gameMode: number
     isHost: boolean | null
     handleDisband: Function
-    //   setScore: Function;
-    //   goBack: Function;
 }
 
 const GameManager: FC<GameManagerProps> = ({
@@ -148,10 +146,6 @@ const GameManager: FC<GameManagerProps> = ({
     // onMount
     useEffect(() => {
         if (!SocketManager.instance.roomId) {
-            //     // toast.error('Please create/join a room to enter a game', {
-            //     //     position: toast.POSITION.BOTTOM_CENTER,
-            //     //     autoClose: 1500
-            //     // })
             navigate('/')
         }
 

@@ -7,7 +7,7 @@ import { JoinRoomPayload } from '../payloads/JoinRoomPayload'
 import { GameOverPayload } from '../payloads/GameOverPayload'
 import { ButtonPayload } from '../payloads/ButtonPayload'
 
-const endpoint = 'localhost:3000'
+export const endpoint = 'localhost:3000'
 
 export interface SocketError {
     where: string
@@ -18,7 +18,6 @@ export interface SocketError {
 export default class SocketManager {
     private static _instance: SocketManager
     private _roomId: string | null = null
-    //private _playerId: string | null = null
     private _isHost: boolean = false
 
     public static get instance() {
@@ -40,9 +39,7 @@ export default class SocketManager {
     public get roomId() {
         return this._roomId || null
     }
-    // public get playerId() {
-    //     return this._playerId || null
-    // }
+
     public get isHost() {
         return this._isHost
     }
@@ -112,13 +109,11 @@ export default class SocketManager {
 
     private _createRoom(data: any) {
         const { gameMode } = data
-        //this._playerId = playerId
         this._socket.emit(SocketEvents.CREATE_ROOM, gameMode)
     }
 
     private _joinRoom(data: any) {
         const { roomId } = data
-        //this._playerId = playerId
         this._socket.emit(SocketEvents.JOIN_ROOM, roomId)
     }
 

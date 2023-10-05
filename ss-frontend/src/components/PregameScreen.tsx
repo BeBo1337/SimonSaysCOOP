@@ -1,14 +1,12 @@
-import { useState, useEffect, ChangeEvent, useRef } from 'react'
-import { Link, Outlet, useNavigate, useSearchParams } from 'react-router-dom'
+import { useState, useEffect, useRef } from 'react'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import '../assets/styles.scss'
 import MsgModal from './MsgModal'
 import svgLogo from '../assets/SimonSaysLogo.png'
 import EventsManager from '../services/EventsManager'
 import { SocketEvents } from '../services/SocketEvents'
 import { JoinRoomPayload } from '../payloads/JoinRoomPayload'
-// import { Errors } from '../utils/CommonErrors'
-import SocketManager from '../services/SocketManager'
-//import { toast } from 'react-toastify'
+import SocketManager, { endpoint } from '../services/SocketManager'
 
 interface PreGameScreenProps {
     isHost: boolean | null
@@ -16,15 +14,11 @@ interface PreGameScreenProps {
     handleDisband: Function
 }
 
-function PreGameScreen({
-    isHost,
-    handleFailToJoin,
-    handleDisband
-}: PreGameScreenProps) {
+function PreGameScreen({ isHost, handleDisband }: PreGameScreenProps) {
     const [modalMsg, setModalMsg] = useState<string>('')
     const [showModal, setShowModal] = useState(false)
     const [canStart, setCanStart] = useState(false)
-    const [searchParams, setSearchParams] = useSearchParams()
+    const [searchParams, _] = useSearchParams()
     const [roomToJoin, setRoomToJoin] = useState<string>('')
     const startedRef = useRef<number>(0)
     const navigate = useNavigate()
@@ -71,12 +65,6 @@ function PreGameScreen({
             onGameStarted
         )
 
-        // EventsManager.instance.on(
-        //     SocketEvents.PLAYER_LEFT_LOBBY,
-        //     'PregameScreen',
-        //     onPlayerLeft
-        // )
-
         EventsManager.instance.on(
             SocketEvents.DISBAND_GAME,
             'GameManager',
@@ -86,10 +74,6 @@ function PreGameScreen({
         window.addEventListener('beforeunload', triggerDisband)
 
         if (isHost && !SocketManager.instance.roomId) {
-            // toast.error('Please create/join a room to enter a game', {
-            //     position: toast.POSITION.BOTTOM_CENTER,
-            //     autoClose: 1500
-            // })
             navigate('/')
         } else if (!isHost) {
             const roomId = searchParams.get('roomId')
@@ -144,16 +128,8 @@ function PreGameScreen({
 
     const handleLinkClick = () => {
         navigator.clipboard.writeText(
-            'http://localhost:5173' +
-                '/join?roomId=' +
-                SocketManager.instance.roomId
+            endpoint + '/join?roomId=' + SocketManager.instance.roomId
         )
-
-        // toast.success('Successfully copied game link to clipboard', {
-        //     position: toast.POSITION.BOTTOM_CENTER,
-        //     toastId: 'copyToast',
-        //     autoClose: 1500
-        // })
     }
 
     return (

@@ -1,6 +1,6 @@
-import { useState, useEffect, FC, ChangeEvent } from 'react'
+import { useState, useEffect, FC } from 'react'
 import { Modes } from '../utils/GameConstants'
-import { Link, Outlet, useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import '../assets/styles.scss'
 import svgLogo from '../assets/SimonSaysLogo.png'
 import DropdownMenu from './GameModeMenu'
