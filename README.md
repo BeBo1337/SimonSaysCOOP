@@ -10,6 +10,9 @@ The game continues until the player makes a mistake by failing to repeat the cor
 
 # Usage
 
+Link to game:
+https://simon-game-coop-1056b0358bfe.herokuapp.com/
+
 Observe the sequence of colors and sounds played by the game.
 Use your mouse to repeat the sequence by clicking on the corresponding buttons.
 If you make a mistake, the game will end, and your final score will be displayed.
